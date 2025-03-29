@@ -1,0 +1,15 @@
+{
+    "plugin_name":"AI Chatbot",
+    "plugin_description":"A chatbot for WordPress.",
+    "plugin_version":"1.0.0",
+    "plugin_file_name":"ai-chatbot.php",
+    "author_name":"Prappo",
+    "author_uri":"https://prappo.github.io",
+    "text_domain":"ai-chatbot",
+    "domain_path":"/languages",
+    "main_class_name":"AiChatbot",
+    "main_function_name":"ai_chatbot_init",
+    "namespace":"AiChatbot",
+    "plugin_prefix":"aicb",
+    "constant_prefix":"AICB"
+}
