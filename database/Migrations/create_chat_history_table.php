@@ -2,7 +2,7 @@
 
 namespace AiChatbot\Database\Migrations;
 
-use Prappo\WpEloquent\Database\Migration;
+use AiChatbot\Interfaces\Migration;
 
 class CreateChatHistoryTable extends Migration
 {
