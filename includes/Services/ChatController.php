@@ -32,22 +32,27 @@ class ChatController
    */
   public function generate_response($message)
   {
-    // Generate embedding for the user message
-    $message_embedding = $this->embedding_generator->generate_embeddings($message);
+    try {
+      // Generate embedding for the user message
+      $message_embedding = $this->embedding_generator->generate_embeddings($message);
 
-    if (is_wp_error($message_embedding)) {
-      throw new \Exception($message_embedding->get_error_message());
+      if (is_wp_error($message_embedding)) {
+        throw new \Exception($message_embedding->get_error_message());
+      }
+
+      // Find relevant content using similarity search
+      $relevant_content = $this->find_relevant_content($message_embedding);
+
+      if (empty($relevant_content)) {
+        return "I apologize, but I couldn't find any relevant information to answer your question. Could you please try rephrasing your question?";
+      }
+
+      // Generate response using the AI service
+      return $this->generate_ai_response($message, $relevant_content);
+    } catch (\Exception $e) {
+      error_log('AI Chatbot Error: ' . $e->getMessage());
+      return "I apologize, but I encountered an error while processing your request. Please try again in a moment.";
     }
-
-    // Find relevant content using similarity search
-    $relevant_content = $this->find_relevant_content($message_embedding);
-
-    if (empty($relevant_content)) {
-      return "I apologize, but I couldn't find any relevant information to answer your question. Could you please try rephrasing your question?";
-    }
-
-    // Generate response using the AI service
-    return $this->generate_ai_response($message, $relevant_content);
   }
 
   /**
@@ -167,7 +172,8 @@ class ChatController
    */
   private function generate_openai_response($prompt, $api_key)
   {
-    $response = wp_remote_post('https://api.openai.com/v1/chat/completions', [
+    $args = [
+      'timeout' => 30, // Increase timeout to 30 seconds
       'headers' => [
         'Authorization' => 'Bearer ' . $api_key,
         'Content-Type' => 'application/json',
@@ -187,16 +193,28 @@ class ChatController
         'temperature' => 0.7,
         'max_tokens' => 500
       ]),
-    ]);
+    ];
+
+    $response = wp_remote_post('https://api.openai.com/v1/chat/completions', $args);
 
     if (is_wp_error($response)) {
-      throw new \Exception($response->get_error_message());
+      error_log('OpenAI API Error: ' . $response->get_error_message());
+      throw new \Exception('Failed to connect to OpenAI API: ' . $response->get_error_message());
+    }
+
+    $response_code = wp_remote_retrieve_response_code($response);
+    if ($response_code !== 200) {
+      $body = json_decode(wp_remote_retrieve_body($response), true);
+      $error_message = isset($body['error']['message']) ? $body['error']['message'] : 'Unknown error';
+      error_log('OpenAI API Error: ' . $error_message);
+      throw new \Exception('OpenAI API error: ' . $error_message);
     }
 
     $body = json_decode(wp_remote_retrieve_body($response), true);
 
-    if (isset($body['error'])) {
-      throw new \Exception($body['error']['message']);
+    if (!isset($body['choices'][0]['message']['content'])) {
+      error_log('OpenAI API Error: Unexpected response format');
+      throw new \Exception('Unexpected response from OpenAI API');
     }
 
     return $body['choices'][0]['message']['content'];
@@ -211,7 +229,8 @@ class ChatController
    */
   private function generate_claude_response($prompt, $api_key)
   {
-    $response = wp_remote_post('https://api.anthropic.com/v1/messages', [
+    $args = [
+      'timeout' => 30, // Increase timeout to 30 seconds
       'headers' => [
         'x-api-key' => $api_key,
         'anthropic-version' => '2023-06-01',
@@ -227,16 +246,28 @@ class ChatController
           ]
         ]
       ]),
-    ]);
+    ];
+
+    $response = wp_remote_post('https://api.anthropic.com/v1/messages', $args);
 
     if (is_wp_error($response)) {
-      throw new \Exception($response->get_error_message());
+      error_log('Claude API Error: ' . $response->get_error_message());
+      throw new \Exception('Failed to connect to Claude API: ' . $response->get_error_message());
+    }
+
+    $response_code = wp_remote_retrieve_response_code($response);
+    if ($response_code !== 200) {
+      $body = json_decode(wp_remote_retrieve_body($response), true);
+      $error_message = isset($body['error']['message']) ? $body['error']['message'] : 'Unknown error';
+      error_log('Claude API Error: ' . $error_message);
+      throw new \Exception('Claude API error: ' . $error_message);
     }
 
     $body = json_decode(wp_remote_retrieve_body($response), true);
 
-    if (isset($body['error'])) {
-      throw new \Exception($body['error']['message']);
+    if (!isset($body['content'][0]['text'])) {
+      error_log('Claude API Error: Unexpected response format');
+      throw new \Exception('Unexpected response from Claude API');
     }
 
     return $body['content'][0]['text'];
