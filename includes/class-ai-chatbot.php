@@ -2,6 +2,8 @@
 
 namespace AiChatbot;
 
+use AiChatbot\Services\ContentExtractor;
+
 /** 
  * Class AiChatbot
  *
@@ -13,6 +15,13 @@ class AiChatbot
    * Plugin version
    */
   private $version = '1.0.0';
+
+  /**
+   * Content extractor service
+   *
+   * @var ContentExtractor
+   */
+  private $content_extractor;
 
   /**
    * Constructor
@@ -39,8 +48,32 @@ class AiChatbot
       define('AICB_ROUTE_PREFIX', 'ai-chatbot/v1');
     }
 
+    // Initialize services
+    $this->init_services();
+
     add_action('init', array($this, 'register_shortcode'));
   }
+
+  /**
+   * Initialize services
+   *
+   * @return void
+   */
+  private function init_services()
+  {
+    $this->content_extractor = new ContentExtractor();
+  }
+
+  /**
+   * Get content extractor service
+   *
+   * @return ContentExtractor
+   */
+  public function get_content_extractor()
+  {
+    return $this->content_extractor;
+  }
+
   /**
    * Register shortcode for the chat interface
    */

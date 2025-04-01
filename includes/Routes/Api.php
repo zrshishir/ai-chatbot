@@ -14,6 +14,7 @@ use AiChatbot\Core\AIService;
 use AiChatbot\Models\ChatHistory;
 use Haruncpi\WpApi\ApiRoute;
 use AiChatbot\Models\Setting;
+use AiChatbot\AiChatbot;
 
 ApiRoute::prefix(
 	AICB_ROUTE_PREFIX,
@@ -63,6 +64,14 @@ class Api
 					'type' => 'string',
 				],
 			],
+		]);
+
+		register_rest_route(AICB_ROUTE_PREFIX, '/test-extraction', [
+			'methods' => 'GET',
+			'callback' => [$this, 'test_content_extraction'],
+			'permission_callback' => function () {
+				return current_user_can('manage_options');
+			}
 		]);
 	}
 
@@ -121,6 +130,38 @@ class Api
 				$e->getMessage(),
 				['status' => 500]
 			);
+		}
+	}
+
+	/**
+	 * Test content extraction endpoint
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public function test_content_extraction()
+	{
+		try {
+			$ai_chatbot = new AiChatbot();
+			$content_extractor = $ai_chatbot->get_content_extractor();
+
+			// Extract content
+			$content = $content_extractor->extract_content();
+
+			// Get statistics
+			$stats = $content_extractor->get_statistics();
+
+			return new \WP_REST_Response(array(
+				'success' => true,
+				'data' => array(
+					'content' => $content,
+					'statistics' => $stats
+				)
+			), 200);
+		} catch (\Exception $e) {
+			return new \WP_REST_Response(array(
+				'success' => false,
+				'message' => $e->getMessage()
+			), 500);
 		}
 	}
 }

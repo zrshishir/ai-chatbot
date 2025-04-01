@@ -3,6 +3,7 @@
 namespace AiChatbot\Admin;
 
 use AiChatbot\Models\Setting;
+use AiChatbot\AiChatbot;
 
 class Settings
 {
@@ -29,7 +30,7 @@ class Settings
       'AI Chatbot', // Menu title
       'manage_options', // Capability required
       'ai-chatbot', // Menu slug
-      [$this, 'render_settings_page'], // Callback function
+      [$this, 'render_main_page'], // Callback function
       'dashicons-format-chat', // Icon
       30 // Position
     );
@@ -42,6 +43,23 @@ class Settings
       'ai-chatbot-settings', // Menu slug
       [$this, 'render_settings_page'] // Callback function
     );
+
+    add_submenu_page(
+      'ai-chatbot',
+      'Content Extraction Test',
+      'Content Test',
+      'manage_options',
+      'ai-chatbot-content-test',
+      [$this, 'render_content_test_page']
+    );
+  }
+
+  /**
+   * Render the main page
+   */
+  public function render_main_page()
+  {
+    include plugin_dir_path(dirname(dirname(__FILE__))) . 'views/admin/main-page.php';
   }
 
   /**
@@ -54,6 +72,8 @@ class Settings
     register_setting('ai_chatbot_settings', 'ai_chatbot_provider');
     register_setting('ai_chatbot_settings', 'ai_chatbot_api_key');
     register_setting('ai_chatbot_settings', 'ai_chatbot_pages');
+    register_setting('ai_chatbot_settings', 'ai_chatbot_openai_api_key');
+    register_setting('ai_chatbot_settings', 'ai_chatbot_max_pages');
   }
 
   /**
@@ -125,5 +145,20 @@ class Settings
       </form>
     </div>
 <?php
+  }
+
+  /**
+   * Render the content test page
+   */
+  public function render_content_test_page()
+  {
+    $ai_chatbot = new AiChatbot();
+    $content_extractor = $ai_chatbot->get_content_extractor();
+
+    // Extract content
+    $content = $content_extractor->extract_content();
+    $stats = $content_extractor->get_statistics();
+
+    include plugin_dir_path(dirname(dirname(__FILE__))) . 'views/admin/content-test-page.php';
   }
 }
