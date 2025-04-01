@@ -14,7 +14,7 @@ class Settings
    */
   public function init()
   {
-    add_action('admin_menu', [$this, 'add_menu_page']);
+    add_action('admin_menu', [$this, 'add_menu_pages']);
     add_action('admin_init', [$this, 'register_settings']);
   }
 
@@ -23,11 +23,11 @@ class Settings
    *
    * @return void
    */
-  public function add_menu_page()
+  public function add_menu_pages()
   {
     add_menu_page(
-      'AI Chatbot', // Page title
-      'AI Chatbot', // Menu title
+      __('AI Chatbot', 'ai-chatbot'), // Page title
+      __('AI Chatbot', 'ai-chatbot'), // Menu title
       'manage_options', // Capability required
       'ai-chatbot', // Menu slug
       [$this, 'render_main_page'], // Callback function
@@ -37,8 +37,8 @@ class Settings
 
     add_submenu_page(
       'ai-chatbot', // Parent slug
-      'AI Chatbot Settings', // Page title
-      'Settings', // Menu title
+      __('Settings', 'ai-chatbot'), // Page title
+      __('Settings', 'ai-chatbot'), // Menu title
       'manage_options', // Capability required
       'ai-chatbot-settings', // Menu slug
       [$this, 'render_settings_page'] // Callback function
@@ -46,8 +46,8 @@ class Settings
 
     add_submenu_page(
       'ai-chatbot',
-      'Content Extraction Test',
-      'Content Test',
+      __('Content Test', 'ai-chatbot'),
+      __('Content Test', 'ai-chatbot'),
       'manage_options',
       'ai-chatbot-content-test',
       [$this, 'render_content_test_page']
@@ -55,12 +55,31 @@ class Settings
 
     add_submenu_page(
       'ai-chatbot',
-      'Embedding Generation Test',
-      'Embedding Test',
+      __('Embedding Test', 'ai-chatbot'),
+      __('Embedding Test', 'ai-chatbot'),
       'manage_options',
       'ai-chatbot-embedding-test',
       [$this, 'render_embedding_test_page']
     );
+
+    add_submenu_page(
+      'ai-chatbot',
+      __('Chat Test', 'ai-chatbot'),
+      __('Chat Test', 'ai-chatbot'),
+      'manage_options',
+      'ai-chatbot-chat-test',
+      [$this, 'render_chat_test_page']
+    );
+  }
+
+  /**
+   * Get the plugin directory path
+   *
+   * @return string
+   */
+  private function get_plugin_dir()
+  {
+    return plugin_dir_path(dirname(dirname(dirname(__FILE__)))) . 'wp-ai-chatbot/';
   }
 
   /**
@@ -68,7 +87,7 @@ class Settings
    */
   public function render_main_page()
   {
-    include plugin_dir_path(dirname(dirname(__FILE__))) . 'views/admin/main-page.php';
+    include $this->get_plugin_dir() . 'views/admin/main-page.php';
   }
 
   /**
@@ -168,7 +187,7 @@ class Settings
     $content = $content_extractor->extract_content();
     $stats = $content_extractor->get_statistics();
 
-    include plugin_dir_path(dirname(dirname(__FILE__))) . 'views/admin/content-test-page.php';
+    include $this->get_plugin_dir() . 'views/admin/content-test-page.php';
   }
 
   /**
@@ -185,6 +204,15 @@ class Settings
     // Generate embeddings
     $embeddings = $embedding_generator->generate_embeddings($test_content);
 
-    include plugin_dir_path(dirname(dirname(__FILE__))) . 'views/admin/embedding-test-page.php';
+    include $this->get_plugin_dir() . 'views/admin/embedding-test-page.php';
+  }
+
+  /**
+   * Render the chat test page
+   */
+  public function render_chat_test_page()
+  {
+    $ai_chatbot = new AiChatbot();
+    include $this->get_plugin_dir() . 'views/admin/chat-test-page.php';
   }
 }

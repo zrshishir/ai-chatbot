@@ -84,6 +84,7 @@ function ai_chatbot_run_migrations()
 		new \AiChatbot\Database\Migrations\CreateSettingsTable(),
 		new \AiChatbot\Database\Migrations\CreateChatHistoryTable(),
 		new \AiChatbot\Database\Migrations\CreatePageEmbeddingsTable(),
+		new \AiChatbot\Database\Migrations\CreateChatTables(),
 		new \AiChatbot\Database\Migrations\Accounts()
 	];
 
@@ -104,7 +105,9 @@ function ai_chatbot_run_migrations()
 	$tables = [
 		$wpdb->prefix . 'aicb_settings',
 		$wpdb->prefix . 'aicb_chat_history',
-		$wpdb->prefix . 'aicb_page_embeddings'
+		$wpdb->prefix . 'aicb_page_embeddings',
+		$wpdb->prefix . 'aicb_chat_sessions',
+		$wpdb->prefix . 'aicb_chat_messages'
 	];
 
 	$all_tables_exist = true;

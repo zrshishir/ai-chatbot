@@ -4,6 +4,7 @@ namespace AiChatbot;
 
 use AiChatbot\Services\ContentExtractor;
 use AiChatbot\Services\EmbeddingGenerator;
+use AiChatbot\Services\ChatInterface;
 
 /** 
  * Class AiChatbot
@@ -32,6 +33,13 @@ class AiChatbot
   private $embedding_generator;
 
   /**
+   * Chat interface service
+   *
+   * @var ChatInterface
+   */
+  private $chat_interface;
+
+  /**
    * Constructor
    */
   public function __construct()
@@ -41,7 +49,7 @@ class AiChatbot
       define('AICB_VERSION', $this->version);
     }
     if (!defined('AICB_PLUGIN_FILE')) {
-      define('AICB_PLUGIN_FILE', dirname(dirname(__FILE__)));
+      define('AICB_PLUGIN_FILE', dirname(dirname(dirname(__FILE__))));
     }
     if (!defined('AICB_DIR')) {
       define('AICB_DIR', plugin_dir_path(AICB_PLUGIN_FILE));
@@ -71,6 +79,8 @@ class AiChatbot
   {
     $this->content_extractor = new ContentExtractor();
     $this->embedding_generator = new EmbeddingGenerator();
+    $this->chat_interface = new ChatInterface();
+    $this->chat_interface->init();
   }
 
   /**
@@ -94,6 +104,16 @@ class AiChatbot
   }
 
   /**
+   * Get chat interface service
+   *
+   * @return ChatInterface
+   */
+  public function get_chat_interface()
+  {
+    return $this->chat_interface;
+  }
+
+  /**
    * Register shortcode for the chat interface
    */
   public function register_shortcode()
@@ -108,18 +128,6 @@ class AiChatbot
    */
   public function render_chat_interface()
   {
-    wp_enqueue_style('ai-chatbot-style', plugin_dir_url(dirname(__FILE__)) . 'assets/css/ai-chatbot.css', array(), $this->version);
-    wp_enqueue_script('ai-chatbot-script', plugin_dir_url(dirname(__FILE__)) . 'assets/js/frontend.js', array('jquery'), $this->version, true);
-
-    wp_localize_script('ai-chatbot-script', 'aiChatbotData', array(
-      'ajaxUrl' => rest_url('ai-chatbot/v1/chat'),
-      'nonce' => wp_create_nonce('wp_rest'),
-    ));
-
-    ob_start();
-?>
-    <div id="ai-chatbot-root"></div>
-<?php
-    return ob_get_clean();
+    return $this->chat_interface->render();
   }
 }
