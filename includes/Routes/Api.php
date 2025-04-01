@@ -73,6 +73,14 @@ class Api
 				return current_user_can('manage_options');
 			}
 		]);
+
+		register_rest_route(AICB_ROUTE_PREFIX, '/test-embeddings', [
+			'methods' => 'GET',
+			'callback' => [$this, 'test_embedding_generation'],
+			'permission_callback' => function () {
+				return current_user_can('manage_options');
+			}
+		]);
 	}
 
 	/**
@@ -152,16 +160,46 @@ class Api
 
 			return new \WP_REST_Response(array(
 				'success' => true,
-				'data' => array(
-					'content' => $content,
-					'statistics' => $stats
-				)
+				'content' => $content,
+				'stats' => $stats
 			), 200);
 		} catch (\Exception $e) {
 			return new \WP_REST_Response(array(
 				'success' => false,
 				'message' => $e->getMessage()
 			), 500);
+		}
+	}
+
+	/**
+	 * Test embedding generation
+	 *
+	 * @return \WP_REST_Response
+	 */
+	public function test_embedding_generation()
+	{
+		try {
+			$ai_chatbot = new AiChatbot();
+			$embedding_generator = $ai_chatbot->get_embedding_generator();
+
+			// Test content
+			$test_content = "This is a test content for embedding generation.";
+
+			// Generate embeddings
+			$embeddings = $embedding_generator->generate_embeddings($test_content);
+
+			if (is_wp_error($embeddings)) {
+				return $embeddings;
+			}
+
+			return rest_ensure_response(array(
+				'success' => true,
+				'content' => $test_content,
+				'embeddings' => $embeddings,
+				'embedding_length' => count($embeddings)
+			));
+		} catch (\Exception $e) {
+			return new \WP_Error('embedding_error', $e->getMessage());
 		}
 	}
 }

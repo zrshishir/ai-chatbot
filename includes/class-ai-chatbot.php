@@ -3,6 +3,7 @@
 namespace AiChatbot;
 
 use AiChatbot\Services\ContentExtractor;
+use AiChatbot\Services\EmbeddingGenerator;
 
 /** 
  * Class AiChatbot
@@ -22,6 +23,13 @@ class AiChatbot
    * @var ContentExtractor
    */
   private $content_extractor;
+
+  /**
+   * Embedding generator service
+   *
+   * @var EmbeddingGenerator
+   */
+  private $embedding_generator;
 
   /**
    * Constructor
@@ -62,6 +70,7 @@ class AiChatbot
   private function init_services()
   {
     $this->content_extractor = new ContentExtractor();
+    $this->embedding_generator = new EmbeddingGenerator();
   }
 
   /**
@@ -72,6 +81,16 @@ class AiChatbot
   public function get_content_extractor()
   {
     return $this->content_extractor;
+  }
+
+  /**
+   * Get embedding generator service
+   *
+   * @return EmbeddingGenerator
+   */
+  public function get_embedding_generator()
+  {
+    return $this->embedding_generator;
   }
 
   /**

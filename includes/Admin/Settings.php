@@ -52,6 +52,15 @@ class Settings
       'ai-chatbot-content-test',
       [$this, 'render_content_test_page']
     );
+
+    add_submenu_page(
+      'ai-chatbot',
+      'Embedding Generation Test',
+      'Embedding Test',
+      'manage_options',
+      'ai-chatbot-embedding-test',
+      [$this, 'render_embedding_test_page']
+    );
   }
 
   /**
@@ -160,5 +169,22 @@ class Settings
     $stats = $content_extractor->get_statistics();
 
     include plugin_dir_path(dirname(dirname(__FILE__))) . 'views/admin/content-test-page.php';
+  }
+
+  /**
+   * Render the embedding test page
+   */
+  public function render_embedding_test_page()
+  {
+    $ai_chatbot = new AiChatbot();
+    $embedding_generator = $ai_chatbot->get_embedding_generator();
+
+    // Test content
+    $test_content = "This is a test content for embedding generation.";
+
+    // Generate embeddings
+    $embeddings = $embedding_generator->generate_embeddings($test_content);
+
+    include plugin_dir_path(dirname(dirname(__FILE__))) . 'views/admin/embedding-test-page.php';
   }
 }
