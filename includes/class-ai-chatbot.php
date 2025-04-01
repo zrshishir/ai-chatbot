@@ -10,10 +10,35 @@ namespace AiChatbot;
 class AiChatbot
 {
   /**
+   * Plugin version
+   */
+  private $version = '1.0.0';
+
+  /**
    * Constructor
    */
   public function __construct()
   {
+    // Define plugin constants if not already defined
+    if (!defined('AICB_VERSION')) {
+      define('AICB_VERSION', $this->version);
+    }
+    if (!defined('AICB_PLUGIN_FILE')) {
+      define('AICB_PLUGIN_FILE', dirname(dirname(__FILE__)));
+    }
+    if (!defined('AICB_DIR')) {
+      define('AICB_DIR', plugin_dir_path(AICB_PLUGIN_FILE));
+    }
+    if (!defined('AICB_URL')) {
+      define('AICB_URL', plugin_dir_url(AICB_PLUGIN_FILE));
+    }
+    if (!defined('AICB_ASSETS_URL')) {
+      define('AICB_ASSETS_URL', AICB_URL . '/assets');
+    }
+    if (!defined('AICB_ROUTE_PREFIX')) {
+      define('AICB_ROUTE_PREFIX', 'ai-chatbot/v1');
+    }
+
     add_action('init', array($this, 'register_shortcode'));
   }
   /**

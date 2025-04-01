@@ -12,12 +12,12 @@ namespace AiChatbot\Routes;
 
 use AiChatbot\Core\AIService;
 use AiChatbot\Models\ChatHistory;
-use AiChatbot\Libs\API\Route;
+use Haruncpi\WpApi\ApiRoute;
 use AiChatbot\Models\Setting;
 
-Route::prefix(
+ApiRoute::prefix(
 	AICB_ROUTE_PREFIX,
-	function (Route $route) {
+	function (ApiRoute $route) {
 
 		// Define accounts API routes.
 

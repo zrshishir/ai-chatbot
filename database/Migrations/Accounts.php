@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Database configuration using Eloquent ORM.
  *
@@ -10,9 +11,7 @@
 namespace AiChatbot\Database\Migrations;
 
 use AiChatbot\Interfaces\Migration;
-use Prappo\WpEloquent\Database\Capsule\Manager as Capsule;
-use Prappo\WpEloquent\Database\Schema\Blueprint;
-use Prappo\WpEloquent\Support\Facades\Schema;
+use wpdb;
 
 /**
  * Class Accounts
@@ -21,44 +20,60 @@ use Prappo\WpEloquent\Support\Facades\Schema;
  *
  * @package AiChatbot\Database\Migrations
  */
-class Accounts implements Migration {
+class Accounts implements Migration
+{
 
 	/**
-	 * Table name for the migration.
-	 *
-	 * @var string
+	 * @var wpdb
 	 */
-	private static $table = 'accounts';
+	private $wpdb;
 
 	/**
-	 * Run the migrations.
+	 * Constructor
 	 */
-	public static function up() {
-		if ( Capsule::schema()->hasTable( self::$table ) ) {
-			return;
-		}
-		Capsule::schema()->create(
-			self::$table,
-			function ( Blueprint $table ) {
-				$table->id();
-				$table->string( 'user_id' )->uniqid();
-				$table->string( 'host' );
-				$table->integer( 'port' );
-				$table->string( 'first_name' );
-				$table->string( 'last_name' );
-				$table->string( 'email' )->unique();
-				$table->string( 'name' );
-				$table->string( 'password' );
-				$table->dateTime( 'created_at' )->nullable();
-				$table->dateTime( 'updated_at' )->nullable();
-			}
-		);
+	public function __construct()
+	{
+		global $wpdb;
+		$this->wpdb = $wpdb;
 	}
 
 	/**
-	 * Reverse the migrations.
+	 * Run the migrations.
+	 *
+	 * @return void
 	 */
-	public static function down() {
-		Schema::dropIfExists( self::$table );
+	public function up()
+	{
+		$charset_collate = $this->wpdb->get_charset_collate();
+
+		$sql = "CREATE TABLE IF NOT EXISTS {$this->wpdb->prefix}aicb_accounts (
+				id bigint(20) NOT NULL AUTO_INCREMENT,
+				user_id varchar(255) NOT NULL,
+				host varchar(255) NOT NULL,
+				port int NOT NULL,
+				first_name varchar(255) NOT NULL,
+				last_name varchar(255) NOT NULL,
+				email varchar(255) NOT NULL,
+				name varchar(255) NOT NULL,
+				password varchar(255) NOT NULL,
+				created_at datetime DEFAULT NULL,
+				updated_at datetime DEFAULT NULL,
+				PRIMARY KEY  (id),
+				UNIQUE KEY email (email),
+				UNIQUE KEY user_id (user_id)
+			) $charset_collate;";
+
+		require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+		dbDelta($sql);
+	}
+
+	/**
+	 * Reverse the migrations (if needed)
+	 *
+	 * @return void
+	 */
+	public function down()
+	{
+		$this->wpdb->query("DROP TABLE IF EXISTS {$this->wpdb->prefix}aicb_accounts");
 	}
 }

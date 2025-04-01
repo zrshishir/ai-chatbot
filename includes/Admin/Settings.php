@@ -24,12 +24,23 @@ class Settings
    */
   public function add_menu_page()
   {
-    add_options_page(
-      'AI Chatbot Settings',
-      'AI Chatbot',
-      'manage_options',
-      'ai-chatbot-settings',
-      [$this, 'render_settings_page']
+    add_menu_page(
+      'AI Chatbot', // Page title
+      'AI Chatbot', // Menu title
+      'manage_options', // Capability required
+      'ai-chatbot', // Menu slug
+      [$this, 'render_settings_page'], // Callback function
+      'dashicons-format-chat', // Icon
+      30 // Position
+    );
+
+    add_submenu_page(
+      'ai-chatbot', // Parent slug
+      'AI Chatbot Settings', // Page title
+      'Settings', // Menu title
+      'manage_options', // Capability required
+      'ai-chatbot-settings', // Menu slug
+      [$this, 'render_settings_page'] // Callback function
     );
   }
 

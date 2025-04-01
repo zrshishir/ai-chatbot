@@ -9,19 +9,20 @@ namespace AiChatbot\Interfaces;
  *
  * @package AiChatbot\Interfaces
  */
-interface Migration {
+interface Migration
+{
 
 	/**
 	 * Perform actions when migrating up.
 	 *
 	 * @return void
 	 */
-	public static function up();
+	public function up();
 
 	/**
 	 * Perform actions when migrating down.
 	 *
 	 * @return void
 	 */
-	public static function down();
+	public function down();
 }
