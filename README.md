@@ -1,135 +1,309 @@
-# AI Chatbot for WordPress
+# WordPress AI Chatbot
 
-A powerful WordPress chatbot that can intelligently answer questions based on your website content using OpenAI or Claude AI.
+A powerful AI-powered chatbot plugin for WordPress that can intelligently answer questions based on your website content.
 
 ## Features
 
-- Intelligent content-based responses using OpenAI or Claude AI
-- Vector search for finding relevant content
-- Beautiful React-based chat interface
-- Easy to use shortcode integration
-- Admin settings for configuration
-- Secure API key management
-- User authentication support
+- 🤖 AI-powered responses using OpenAI or Claude
+- 📚 Content extraction from WordPress pages
+- 🔍 Vector search for relevant content
+- 💬 Modern chat interface
+- 📱 Responsive design
+- 🔒 Secure API key management
+- 📊 Chat history tracking
+- 🌐 Public/private access control
 
-## Requirements
+## Screenshots
+
+<table>
+  <tr>
+    <td><img src="screen-shots/dashboard-ai-chatbot.png" alt="Dashboard" /></td>
+    <td><img src="screen-shots/setting-ai-chatbot.png" alt="Settings" /></td>
+  </tr>
+  <tr>
+    <td><img src="screen-shots/content-ai-chatbot.png" alt="Content Management" /></td>
+    <td><img src="screen-shots/chat-ai-chatbot.png" alt="Chat Interface" /></td>
+  </tr>
+  <tr>
+    <td colspan="2"><img src="screen-shots/embedded-ai-chatbot.png" alt="Embedded Chat" /></td>
+  </tr>
+</table>
+
+## Technologies Used
+
+- **Backend:**
+
+  - PHP 7.4+
+  - WordPress Plugin Architecture
+  - OpenAI API / Claude API
+  - MySQL/MariaDB
+
+- **Frontend:**
+  - React.js
+  - TypeScript
+  - TailwindCSS
+  - React Context for state management
+
+## Project Setup
+
+### Prerequisites
 
 - WordPress 5.8 or higher
 - PHP 7.4 or higher
-- OpenAI API key or Claude API key
-- Node.js and npm (for development)
+- MySQL 5.6 or higher
+- Node.js 14+ (for frontend development)
 
-## Installation
+### Installation
 
-1. Download the plugin zip file
-2. Go to WordPress admin > Plugins > Add New
-3. Click "Upload Plugin" and select the downloaded zip file
-4. Click "Install Now" and then "Activate"
+1. Clone the repository:
 
-## Configuration
-
-1. Go to WordPress admin > Settings > AI Chatbot
-2. Select your preferred AI provider (OpenAI or Claude)
-3. Enter your API key
-4. Select the pages you want to index for the chatbot
-5. Save the settings
-
-## Usage
-
-Add the chatbot to any page or post using the shortcode:
-
-```
-[ai_chatbot]
+```bash
+git clone https://github.com/yourusername/wp-ai-chatbot.git
+cd wp-ai-chatbot
 ```
 
-The chatbot will only be visible to logged-in users. When a user is not logged in, they will see a message asking them to log in first.
+2. Install PHP dependencies:
 
-## Development
+```bash
+composer install
+```
 
-### Setup
+3. Install frontend dependencies:
 
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   npm install
-   composer install
+```bash
+cd src/frontend
+npm install
+```
+
+4. Build the frontend:
+
+```bash
+npm run build
+```
+
+5. Copy the plugin to your WordPress plugins directory:
+
+```bash
+cp -r wp-ai-chatbot /path/to/wordpress/wp-content/plugins/
+```
+
+6. Activate the plugin through WordPress admin panel
+
+### Configuration
+
+1. Go to WordPress admin panel → Dashboard → Settings
+2. Enter your OpenAI or Claude API key
+3. Select the pages you want to index
+4. Configure other settings as needed
+
+## Content Extraction and Processing
+
+### How It Works
+
+1. **Content Extraction:**
+
+   - The plugin scans selected WordPress pages
+   - Extracts text content, titles, and metadata
+   - Cleans HTML and removes unnecessary elements
+   - Preserves important formatting and structure
+
+2. **Content Processing:**
+
+   - Text is chunked into manageable segments
+   - Each segment is processed for embedding generation
+   - Embeddings are stored in the database for quick retrieval
+
+3. **Vector Search:**
+   - User queries are converted to embeddings
+   - Similar content is retrieved using vector similarity
+   - Most relevant content is used for context
+
+### Database Structure
+
+```sql
+-- Chat Sessions Table
+CREATE TABLE wp_aicb_chat_sessions (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    session_id VARCHAR(255) NOT NULL,
+    user_id BIGINT UNSIGNED,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Chat Messages Table
+CREATE TABLE wp_aicb_chat_messages (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    session_id VARCHAR(255) NOT NULL,
+    role ENUM('user', 'assistant') NOT NULL,
+    content TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Embeddings Table
+CREATE TABLE wp_aicb_embeddings (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    content TEXT NOT NULL,
+    embedding LONGTEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+## Prompt Engineering
+
+### Approach
+
+1. **Context Building:**
+
+   - Retrieve relevant content using vector search
+   - Format content into clear, concise context
+   - Include metadata and source information
+
+2. **System Prompt:**
+
+   ```text
+   You are a helpful AI assistant for [website name].
+   Use the following context to answer questions:
+   [Relevant content]
+
+   Guidelines:
+   - Be concise and accurate
+   - Cite sources when possible
+   - Acknowledge limitations
    ```
 
-### Building Assets
+3. **User Query Processing:**
+   - Clean and normalize user input
+   - Extract key concepts for context matching
+   - Format query for optimal AI processing
 
-1. For development:
+## Frontend Implementation
 
-   ```bash
-   npm run dev
-   ```
+### React Components
 
-2. For production:
-   ```bash
-   npm run build
-   ```
+```typescript
+// src/frontend/components/ChatContainer.tsx
+interface ChatContainerProps {
+  messages: Message[];
+  onSendMessage: (message: string) => void;
+  isLoading: boolean;
+}
 
-### Project Structure
-
-```
-wp-ai-chatbot/
-├── assets/              # Compiled assets
-├── database/           # Database migrations
-├── includes/           # PHP classes
-│   ├── Admin/         # Admin-related classes
-│   ├── Core/          # Core functionality
-│   ├── Models/        # Database models
-│   ├── Routes/        # API routes
-│   └── Shortcodes/    # Shortcode handlers
-├── src/               # Source files
-│   ├── admin/        # Admin JavaScript
-│   └── frontend/     # Frontend JavaScript
-└── views/            # PHP templates
+const ChatContainer: React.FC<ChatContainerProps> = ({ messages, onSendMessage, isLoading }) => {
+  // Component implementation
+};
 ```
 
-## Technical Details
+### State Management
 
-### Content Extraction
+```typescript
+// src/frontend/context/ChatContext.tsx
+interface ChatContextType {
+  messages: Message[];
+  isLoading: boolean;
+  sendMessage: (message: string) => Promise<void>;
+}
 
-The plugin extracts content from selected WordPress pages and generates embeddings using the chosen AI provider. These embeddings are stored in the database and used for vector search when answering questions.
+const ChatContext = createContext<ChatContextType | undefined>(undefined);
+```
 
-### Vector Search
+### Error Handling
 
-When a user asks a question:
+```typescript
+// src/frontend/hooks/useChat.ts
+const useChat = () => {
+  const [error, setError] = useState<Error | null>(null);
 
-1. The question is converted to an embedding
-2. The embedding is compared with stored page embeddings using cosine similarity
-3. The most relevant content is selected and used to generate a response
+  const handleError = (error: Error) => {
+    setError(error);
+    // Log error to analytics
+    // Show user-friendly error message
+  };
+};
+```
 
-### Prompt Engineering
+## Challenges and Solutions
 
-The plugin uses carefully crafted prompts to ensure accurate and helpful responses:
+1. **Challenge: Content Processing**
 
-- Context from relevant pages is included
-- Sources are cited when possible
-- The AI is instructed to only answer based on the provided context
+   - Problem: Large pages with complex HTML
+   - Solution: Implemented HTML cleaning and smart chunking
 
-## Security
+2. **Challenge: API Response Time**
 
-- API keys are stored securely in the WordPress options table
-- All API requests are authenticated
-- User authentication is required to use the chatbot
-- Input is properly sanitized and validated
+   - Problem: Slow AI responses
+   - Solution: Added caching and optimized context retrieval
+
+3. **Challenge: State Management**
+
+   - Problem: Complex chat state
+   - Solution: Implemented React Context with proper typing
+
+4. **Challenge: Error Handling**
+   - Problem: Various failure points
+   - Solution: Comprehensive error handling and user feedback
+
+## Technical Specifications
+
+### Frontend Requirements
+
+1. **React Implementation:**
+
+   - Use functional components
+   - Implement proper TypeScript types
+   - Follow React best practices
+
+2. **State Management:**
+
+   - Use React Context for global state
+   - Implement proper loading states
+   - Handle error states gracefully
+
+3. **UI/UX:**
+
+   - Clean, modern design
+   - Responsive layout
+   - Loading indicators
+   - Error messages
+   - Smooth animations
+
+4. **Code Quality:**
+   - Comprehensive comments
+   - TypeScript types
+   - ESLint configuration
+   - Prettier formatting
+
+### Backend Requirements
+
+1. **API Endpoints:**
+
+   - RESTful design
+   - Proper authentication
+   - Rate limiting
+   - Error handling
+
+2. **Database:**
+
+   - Optimized queries
+   - Proper indexing
+   - Transaction handling
+
+3. **Security:**
+   - API key encryption
+   - Input sanitization
+   - XSS prevention
+   - CSRF protection
 
 ## Contributing
 
 1. Fork the repository
-2. Create a feature branch
+2. Create your feature branch
 3. Commit your changes
 4. Push to the branch
 5. Create a Pull Request
 
 ## License
 
-This plugin is licensed under the GPL v2 or later.
-
-## Support
-
-For support, please create an issue in the GitHub repository or contact the plugin author.
+This project is licensed under the GPL v2 or later - see the [LICENSE](LICENSE) file for details.
 
 # WordPress Plugin Boilerplate
 
