@@ -58,7 +58,7 @@ if (!defined('ABSPATH')) {
     </div>
 
     <!-- Chat Controller -->
-    <div class="ai-chatbot-test-section">
+    <!-- <div class="ai-chatbot-test-section">
       <h2><?php echo esc_html__('Message Controller', 'ai-chatbot'); ?></h2>
       <div class="ai-chatbot-test-box">
         <form id="ai-chatbot-test-form" class="ai-chatbot-test-form">
@@ -74,7 +74,7 @@ if (!defined('ABSPATH')) {
         </form>
         <div id="test-response" class="ai-chatbot-test-response"></div>
       </div>
-    </div>
+    </div> -->
   </div>
 </div>
 

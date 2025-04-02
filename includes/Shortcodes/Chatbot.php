@@ -24,24 +24,54 @@ class Chatbot
    */
   public function enqueue_scripts()
   {
-    wp_enqueue_style(
-      'ai-chatbot-frontend',
-      Plugin::get_plugin_url() . 'assets/css/frontend.css',
+    // Enqueue React and ReactDOM
+    wp_enqueue_script(
+      'react',
+      'https://unpkg.com/react@18/umd/react.production.min.js',
       [],
-      Plugin::get_version()
+      '18.0.0',
+      true
     );
 
     wp_enqueue_script(
+      'react-dom',
+      'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js',
+      ['react'],
+      '18.0.0',
+      true
+    );
+
+    // Enqueue our bundled app
+    wp_enqueue_script(
       'ai-chatbot-frontend',
-      Plugin::get_plugin_url() . 'assets/js/frontend.js',
+      Plugin::get_plugin_url() . 'build/frontend.js',
       ['react', 'react-dom'],
       Plugin::get_version(),
       true
     );
 
-    wp_localize_script('ai-chatbot-frontend', 'aiChatbotFrontend', [
+    wp_enqueue_style(
+      'ai-chatbot-frontend',
+      Plugin::get_plugin_url() . 'build/frontend.css',
+      [],
+      Plugin::get_version()
+    );
+
+    // Pass data to JavaScript
+    wp_localize_script('ai-chatbot-frontend', 'aiChatbotData', [
       'apiUrl' => rest_url('ai-chatbot/v1'),
-      'nonce' => wp_create_nonce('wp_rest')
+      'nonce' => wp_create_nonce('wp_rest'),
+      'settings' => [
+        'provider' => get_option('ai_chatbot_provider', 'openai'),
+        'maxTokens' => get_option('ai_chatbot_max_tokens', 150),
+        'temperature' => get_option('ai_chatbot_temperature', 0.7),
+      ],
+      'i18n' => [
+        'placeholder' => __('Type your message...', 'ai-chatbot'),
+        'sendButton' => __('Send', 'ai-chatbot'),
+        'errorMessage' => __('An error occurred. Please try again.', 'ai-chatbot'),
+        'thinking' => __('AI is thinking...', 'ai-chatbot'),
+      ]
     ]);
   }
 
@@ -53,10 +83,10 @@ class Chatbot
    */
   public function render($atts)
   {
-    if (!is_user_logged_in()) {
-      return '<p>Please log in to use the chatbot.</p>';
+    if (!is_user_logged_in() && !get_option('ai_chatbot_public_access', false)) {
+      return '<p>' . esc_html__('Please log in to use the chatbot.', 'ai-chatbot') . '</p>';
     }
 
-    return '<div id="ai-chatbot-root"></div>';
+    return '<div id="ai-chatbot-root" class="ai-chatbot-wp"></div>';
   }
 }

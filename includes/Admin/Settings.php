@@ -49,17 +49,17 @@ class Settings
       __('Content', 'ai-chatbot'),
       __('Content', 'ai-chatbot'),
       'manage_options',
-      'ai-chatbot-content-test',
-      [$this, 'render_content_test_page']
+      'ai-chatbot-content',
+      [$this, 'render_content_page']
     );
 
     add_submenu_page(
       'ai-chatbot',
-      __('Embedding', 'ai-chatbot'),
-      __('Embedding', 'ai-chatbot'),
+      __('Embeddings', 'ai-chatbot'),
+      __('Embeddings', 'ai-chatbot'),
       'manage_options',
-      'ai-chatbot-embedding-test',
-      [$this, 'render_embedding_test_page']
+      'ai-chatbot-embeddings',
+      [$this, 'render_embedding_page']
     );
 
     add_submenu_page(
@@ -67,8 +67,8 @@ class Settings
       __('Chat', 'ai-chatbot'),
       __('Chat', 'ai-chatbot'),
       'manage_options',
-      'ai-chatbot-chat-test',
-      [$this, 'render_chat_test_page']
+      'ai-chatbot-chat',
+      [$this, 'render_chat_page']
     );
   }
 
@@ -176,9 +176,9 @@ class Settings
   }
 
   /**
-   * Render the content test page
+   * Render the content page
    */
-  public function render_content_test_page()
+  public function render_content_page()
   {
     $ai_chatbot = new AiChatbot();
     $content_extractor = $ai_chatbot->get_content_extractor();
@@ -187,13 +187,13 @@ class Settings
     $content = $content_extractor->extract_content();
     $stats = $content_extractor->get_statistics();
 
-    include $this->get_plugin_dir() . 'views/admin/content-test-page.php';
+    include $this->get_plugin_dir() . 'views/admin/content-page.php';
   }
 
   /**
-   * Render the embedding test page
+   * Render the embedding page
    */
-  public function render_embedding_test_page()
+  public function render_embedding_page()
   {
     $ai_chatbot = new AiChatbot();
     $embedding_generator = $ai_chatbot->get_embedding_generator();
@@ -204,15 +204,15 @@ class Settings
     // Generate embeddings
     $embeddings = $embedding_generator->generate_embeddings($test_content);
 
-    include $this->get_plugin_dir() . 'views/admin/embedding-test-page.php';
+    include $this->get_plugin_dir() . 'views/admin/embedding-page.php';
   }
 
   /**
-   * Render the chat test page
+   * Render the chat page
    */
-  public function render_chat_test_page()
+  public function render_chat_page()
   {
     $ai_chatbot = new AiChatbot();
-    include $this->get_plugin_dir() . 'views/admin/chat-test-page.php';
+    include $this->get_plugin_dir() . 'views/admin/chat-page.php';
   }
 }

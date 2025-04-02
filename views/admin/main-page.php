@@ -5,16 +5,18 @@ if (!defined('ABSPATH')) {
 ?>
 
 <div class="wrap">
-  <h1>AI Chatbot</h1>
+  <h1>Dashboard</h1>
 
   <div class="card">
-    <h2>Welcome to AI Chatbot</h2>
+    <h2>Welcome to the Dashboard</h2>
     <p>This plugin helps you create an AI-powered chatbot that can answer questions based on your website content.</p>
 
     <h3>Quick Links</h3>
     <ul>
       <li><a href="<?php echo admin_url('admin.php?page=ai-chatbot-settings'); ?>">Settings</a> - Configure your AI provider and API keys</li>
-      <li><a href="<?php echo admin_url('admin.php?page=ai-chatbot-content-test'); ?>">Content Test</a> - Test content extraction from your website</li>
+      <li><a href="<?php echo admin_url('admin.php?page=ai-chatbot-content'); ?>">Content</a> - Manage content extraction from your website</li>
+      <li><a href="<?php echo admin_url('admin.php?page=ai-chatbot-embeddings'); ?>">Embeddings</a> - View and manage content embeddings</li>
+      <li><a href="<?php echo admin_url('admin.php?page=ai-chatbot-chat'); ?>">Chat</a> - Test and monitor the chat interface</li>
     </ul>
   </div>
 
@@ -24,9 +26,9 @@ if (!defined('ABSPATH')) {
       <li>Go to the <a href="<?php echo admin_url('admin.php?page=ai-chatbot-settings'); ?>">Settings</a> page</li>
       <li>Choose your AI provider (OpenAI or Claude)</li>
       <li>Enter your API key</li>
-      <4>Select the pages you want to index</li>
-        <5>Save your settings</li>
-          <6>Use the shortcode <code>[ai_chatbot]</code> to add the chatbot to any page</li>
+      <li>Select the pages you want to index</li>
+      <li>Save your settings</li>
+      <li>Use the shortcode <code>[ai_chatbot]</code> to add the chatbot to any page</li>
     </ol>
   </div>
 </div>

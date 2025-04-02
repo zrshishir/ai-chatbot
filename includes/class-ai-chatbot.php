@@ -81,6 +81,12 @@ class AiChatbot
     $this->embedding_generator = new EmbeddingGenerator();
     $this->chat_interface = new ChatInterface();
     $this->chat_interface->init();
+
+    // Initialize REST API endpoints
+    add_action('rest_api_init', function () {
+      $chat_endpoint = new Rest\ChatEndpoint();
+      $chat_endpoint->register_routes();
+    });
   }
 
   /**
