@@ -5,7 +5,7 @@ namespace AiChatbot\Services;
 /**
  * Class EmbeddingGenerator
  * 
- * Handles generation of embeddings using AI services
+ * Handles embedding generation and storage
  */
 class EmbeddingGenerator
 {
@@ -47,22 +47,39 @@ class EmbeddingGenerator
   }
 
   /**
-   * Generate embeddings for content
+   * Generate embeddings for text
    *
-   * @param string $content Content to generate embeddings for
-   * @return array|WP_Error Embeddings or error
+   * @param string $text Text to generate embeddings for
+   * @return array|WP_Error Embeddings array or WP_Error on failure
    */
-  public function generate_embeddings($content)
+  public function generate_embeddings($text)
   {
-    if (empty($this->api_key)) {
+    global $wpdb;
+
+    $table_name = $wpdb->prefix . 'aicb_page_embeddings';
+
+    // First check if we already have embeddings for this text
+    $existing_embedding = $wpdb->get_row($wpdb->prepare(
+      "SELECT * FROM $table_name WHERE content = %s",
+      $text
+    ));
+
+    if ($existing_embedding) {
+      return json_decode($existing_embedding->embedding, true);
+    }
+
+    // If no existing embedding, generate new one
+    $api_key = get_option('ai_chatbot_api_key', '');
+    if (empty($api_key)) {
       return new \WP_Error('no_api_key', 'API key not configured');
     }
 
-    switch ($this->provider) {
+    $provider = get_option('ai_chatbot_provider', 'openai');
+    switch ($provider) {
       case 'openai':
-        return $this->generate_openai_embeddings($content);
+        return $this->generate_openai_embeddings($text, $api_key);
       case 'claude':
-        return $this->generate_claude_embeddings($content);
+        return $this->generate_claude_embeddings($text, $api_key);
       default:
         return new \WP_Error('invalid_provider', 'Invalid AI provider');
     }
@@ -71,31 +88,48 @@ class EmbeddingGenerator
   /**
    * Generate embeddings using OpenAI
    *
-   * @param string $content Content to generate embeddings for
-   * @return array|WP_Error Embeddings or error
+   * @param string $text Text to generate embeddings for
+   * @param string $api_key API key
+   * @return array|WP_Error Embeddings array or WP_Error on failure
    */
-  private function generate_openai_embeddings($content)
+  private function generate_openai_embeddings($text, $api_key)
   {
-    $response = wp_remote_post($this->openai_endpoint, [
+    $args = [
+      'timeout' => 30,
       'headers' => [
-        'Authorization' => 'Bearer ' . $this->api_key,
+        'Authorization' => 'Bearer ' . $api_key,
         'Content-Type' => 'application/json',
       ],
       'body' => json_encode([
         'model' => 'text-embedding-ada-002',
-        'input' => $content,
+        'input' => $text
       ]),
-    ]);
+    ];
+
+    $response = wp_remote_post('https://api.openai.com/v1/embeddings', $args);
 
     if (is_wp_error($response)) {
+      error_log('OpenAI Embeddings API Error: ' . $response->get_error_message());
       return $response;
+    }
+
+    $response_code = wp_remote_retrieve_response_code($response);
+    if ($response_code !== 200) {
+      $body = json_decode(wp_remote_retrieve_body($response), true);
+      $error_message = isset($body['error']['message']) ? $body['error']['message'] : 'Unknown error';
+      error_log('OpenAI Embeddings API Error: ' . $error_message);
+      return new \WP_Error('api_error', $error_message);
     }
 
     $body = json_decode(wp_remote_retrieve_body($response), true);
 
-    if (isset($body['error'])) {
-      return new \WP_Error('openai_error', $body['error']['message']);
+    if (!isset($body['data'][0]['embedding'])) {
+      error_log('OpenAI Embeddings API Error: Unexpected response format');
+      return new \WP_Error('invalid_response', 'Unexpected response from OpenAI API');
     }
+
+    // Store the embedding in the database
+    $this->store_embedding($text, $body['data'][0]['embedding']);
 
     return $body['data'][0]['embedding'];
   }
@@ -103,34 +137,75 @@ class EmbeddingGenerator
   /**
    * Generate embeddings using Claude
    *
-   * @param string $content Content to generate embeddings for
-   * @return array|WP_Error Embeddings or error
+   * @param string $text Text to generate embeddings for
+   * @param string $api_key API key
+   * @return array|WP_Error Embeddings array or WP_Error on failure
    */
-  private function generate_claude_embeddings($content)
+  private function generate_claude_embeddings($text, $api_key)
   {
-    $response = wp_remote_post($this->claude_endpoint, [
+    $args = [
+      'timeout' => 30,
       'headers' => [
-        'x-api-key' => $this->api_key,
+        'x-api-key' => $api_key,
         'anthropic-version' => '2023-06-01',
         'Content-Type' => 'application/json',
       ],
       'body' => json_encode([
         'model' => 'claude-3-sonnet-20240229',
-        'input' => $content,
+        'input' => $text,
+        'embedding_type' => 'text'
       ]),
-    ]);
+    ];
+
+    $response = wp_remote_post('https://api.anthropic.com/v1/embeddings', $args);
 
     if (is_wp_error($response)) {
+      error_log('Claude Embeddings API Error: ' . $response->get_error_message());
       return $response;
+    }
+
+    $response_code = wp_remote_retrieve_response_code($response);
+    if ($response_code !== 200) {
+      $body = json_decode(wp_remote_retrieve_body($response), true);
+      $error_message = isset($body['error']['message']) ? $body['error']['message'] : 'Unknown error';
+      error_log('Claude Embeddings API Error: ' . $error_message);
+      return new \WP_Error('api_error', $error_message);
     }
 
     $body = json_decode(wp_remote_retrieve_body($response), true);
 
-    if (isset($body['error'])) {
-      return new \WP_Error('claude_error', $body['error']['message']);
+    if (!isset($body['embedding'])) {
+      error_log('Claude Embeddings API Error: Unexpected response format');
+      return new \WP_Error('invalid_response', 'Unexpected response from Claude API');
     }
 
+    // Store the embedding in the database
+    $this->store_embedding($text, $body['embedding']);
+
     return $body['embedding'];
+  }
+
+  /**
+   * Store embedding in the database
+   *
+   * @param string $content Original text content
+   * @param array $embedding Embedding array
+   * @return bool Success status
+   */
+  private function store_embedding($content, $embedding)
+  {
+    global $wpdb;
+
+    $table_name = $wpdb->prefix . 'aicb_page_embeddings';
+
+    return $wpdb->insert(
+      $table_name,
+      [
+        'content' => $content,
+        'embedding' => json_encode($embedding)
+      ],
+      ['%s', '%s']
+    );
   }
 
   /**

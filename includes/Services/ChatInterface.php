@@ -151,8 +151,22 @@ class ChatInterface
 ?>
     <div id="ai-chatbot-container" class="ai-chatbot-container">
       <div class="ai-chatbot-header">
-        <h3><?php echo esc_html__('AI Chatbot', 'ai-chatbot'); ?></h3>
-        <button class="ai-chatbot-close">&times;</button>
+        <div class="ai-chatbot-header-content">
+          <div class="ai-chatbot-avatar">
+            <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </div>
+          <div class="ai-chatbot-info">
+            <div class="ai-chatbot-name"><?php echo esc_html__('AI Assistant', 'ai-chatbot'); ?></div>
+            <div class="ai-chatbot-status"><?php echo esc_html__('Online', 'ai-chatbot'); ?></div>
+          </div>
+        </div>
+        <button class="ai-chatbot-close" aria-label="<?php echo esc_attr__('Close chat', 'ai-chatbot'); ?>">
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
       </div>
 
       <div class="ai-chatbot-messages"></div>
@@ -160,9 +174,12 @@ class ChatInterface
       <div class="ai-chatbot-input">
         <textarea
           placeholder="<?php echo esc_attr__('Type your message...', 'ai-chatbot'); ?>"
-          rows="1"></textarea>
-        <button class="ai-chatbot-send">
-          <?php echo esc_html__('Send', 'ai-chatbot'); ?>
+          rows="1"
+          aria-label="<?php echo esc_attr__('Message input', 'ai-chatbot'); ?>"></textarea>
+        <button class="ai-chatbot-send" aria-label="<?php echo esc_attr__('Send message', 'ai-chatbot'); ?>">
+          <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2" fill="none">
+            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+          </svg>
         </button>
       </div>
     </div>

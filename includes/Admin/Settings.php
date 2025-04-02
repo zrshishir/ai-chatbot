@@ -46,8 +46,8 @@ class Settings
 
     add_submenu_page(
       'ai-chatbot',
-      __('Content Test', 'ai-chatbot'),
-      __('Content Test', 'ai-chatbot'),
+      __('Content', 'ai-chatbot'),
+      __('Content', 'ai-chatbot'),
       'manage_options',
       'ai-chatbot-content-test',
       [$this, 'render_content_test_page']
@@ -55,8 +55,8 @@ class Settings
 
     add_submenu_page(
       'ai-chatbot',
-      __('Embedding Test', 'ai-chatbot'),
-      __('Embedding Test', 'ai-chatbot'),
+      __('Embedding', 'ai-chatbot'),
+      __('Embedding', 'ai-chatbot'),
       'manage_options',
       'ai-chatbot-embedding-test',
       [$this, 'render_embedding_test_page']
@@ -64,8 +64,8 @@ class Settings
 
     add_submenu_page(
       'ai-chatbot',
-      __('Chat Test', 'ai-chatbot'),
-      __('Chat Test', 'ai-chatbot'),
+      __('Chat', 'ai-chatbot'),
+      __('Chat', 'ai-chatbot'),
       'manage_options',
       'ai-chatbot-chat-test',
       [$this, 'render_chat_test_page']
