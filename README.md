@@ -304,3 +304,7 @@ const useChat = () => {
 ## License
 
 This project is licensed under the GPL v2 or later - see the [LICENSE](LICENSE) file for details.
+
+## Credits
+
+This project was initially scaffolded using the [WordPress Plugin Boilerplate](https://github.com/prappo/wordpress-plugin-boilerplate) by Prappo. Many thanks to the contributors of that project for providing a solid foundation for building WordPress plugins.
